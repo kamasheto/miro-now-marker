@@ -28,10 +28,11 @@ jobs:
       MIRO_ACCESS_TOKEN: ${{ secrets.MIRO_ACCESS_TOKEN }}
       MIRO_BOARD_ID: ${{ secrets.MIRO_BOARD_ID }}
       MIRO_ITEM_ID: ${{ secrets.MIRO_ITEM_ID }}
-      # Calibrate with the "inspect" mode: drag the line to each time on the board, read its y.
-      AGENDA_STOPS: "09:00=0,17:00=1000"
-      # Set to the offsite day(s) so the workflow is a no-op on any other weekday.
-      OFFSITE_DATES: ""
+      # Repo variables (Settings → Secrets and variables → Actions → Variables).
+      # AGENDA_STOPS: calibrate with "inspect" mode, e.g. "09:00=0,12:00=300,17:00=1000"
+      AGENDA_STOPS: ${{ vars.AGENDA_STOPS }}
+      # OFFSITE_DATES: e.g. "2026-11-24,2026-11-25"; empty = run every weekday
+      OFFSITE_DATES: ${{ vars.OFFSITE_DATES }}
       INTERVAL_SECONDS: "120"
     steps:
       - uses: actions/checkout@v4
