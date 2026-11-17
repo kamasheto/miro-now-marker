@@ -33,7 +33,7 @@ jobs:
       AGENDA_STOPS: ${{ vars.AGENDA_STOPS }}
       # OFFSITE_DATES: e.g. "2026-11-24,2026-11-25"; empty = run every weekday
       OFFSITE_DATES: ${{ vars.OFFSITE_DATES }}
-      INTERVAL_SECONDS: "120"
+      INTERVAL_SECONDS: ${{ vars.INTERVAL_SECONDS }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
