@@ -1,0 +1,47 @@
+name: Move agenda line
+
+on:
+  schedule:
+    # Cron is UTC. In November Berlin is UTC+1 (CET); during summer time (CEST) subtract one more hour.
+    # Two long-running jobs cover 09:00-17:00 Berlin because a hosted job may run at most 6h.
+    # Avoid :00 — GitHub delays scheduled runs most at the top of the hour.
+    - cron: "50 7 * * 1-5"   # 08:50 Berlin, loops until ~14:40
+    - cron: "50 11 * * 1-5"  # 12:50 Berlin, takes over and loops until 17:00
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "loop, once, or inspect"
+        default: loop
+        type: choice
+        options: [loop, once, inspect]
+
+# A newer run cancels the older one, so the second cron cleanly takes over.
+concurrency:
+  group: agenda-line
+  cancel-in-progress: true
+
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      MIRO_ACCESS_TOKEN: ${{ secrets.MIRO_ACCESS_TOKEN }}
+      MIRO_BOARD_ID: ${{ secrets.MIRO_BOARD_ID }}
+      MIRO_ITEM_ID: ${{ secrets.MIRO_ITEM_ID }}
+      # Calibrate with the "inspect" mode: drag the line to each time on the board, read its y.
+      AGENDA_STOPS: "09:00=0,17:00=1000"
+      # Set to the offsite day(s) so the workflow is a no-op on any other weekday.
+      OFFSITE_DATES: ""
+      INTERVAL_SECONDS: "120"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Move line
+        run: |
+          case "${{ inputs.mode || 'loop' }}" in
+            loop)    python scripts/move_obj.py --loop ;;
+            once)    python scripts/move_obj.py ;;
+            inspect) python scripts/move_obj.py --inspect ;;
+          esac
